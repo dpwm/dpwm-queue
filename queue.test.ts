@@ -1,8 +1,6 @@
 import { expect, test } from 'vitest';
 import { Queue } from './queue.js';
 
-const sum = (a, b) => a + b;
-
 test('construction test', async () => {
   const q = new Queue();
   q.push(1);
@@ -19,8 +17,8 @@ test('iteration test', async () => {
 
 test('parallel iteration test', async () => {
   const q = new Queue([1,2,3,4,5]);
-  const events = [];
-  const sleep = (n) => new Promise((resolve) => {setTimeout(resolve, n)});
+  const events: number[] = [];
+  const sleep = (n: number) => new Promise((resolve) => {setTimeout(resolve, n)});
   await Promise.all([
     q.pForEach(async (x) => {events.push(x); await sleep(10); events.push(x)}, 4),
     sleep(50).then(() => {q.push(6); q.close()}),

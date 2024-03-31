@@ -1,27 +1,18 @@
-interface IQueue<T> {
-  done: boolean,
-  items: T[],
-
-  push(T): void,
-  close(T): void,
-  pForEach(f: (T, number) => Promise<void>, p?: number, retries?: number, onError?: any ): Promise<void>,
-}
-
-export class Queue<T> implements IQueue<T> {
-  done = false;
-  items;
-  private resolvers = [];
+export class Queue<T> {
+  done: boolean = false;
+  items: T[];
+  private resolvers:((value?: undefined) => void)[] = [];
 
   constructor(items: T[] = []) {
     this.items = items;
   }
 
-  private resolve() {
+  private resolve():void {
     this.resolvers.forEach(f => f());
     this.resolvers = [];
   }
 
-  push(x) {
+  push(x: T): void {
     if (this.done) {
       throw new Error("Queue closed");
     }
@@ -29,12 +20,12 @@ export class Queue<T> implements IQueue<T> {
     this.resolve();
   }
 
-  close() {
+  close(): void {
     this.done = true;
     this.resolve();
   }
 
-  pForEach(f, p=1, retries=10, onError=(x,n,errors) => {console.log(x, n, errors)}) {
+  pForEach(f: (x: T, n: number) => Promise<void>, p:number=1, retries:number=10, onError:any=(x:T,n:number,errors:Error[]) => {console.log(x, n, errors)}) {
     // Parallel forEach that minimises wasted time and automatically retries on failure
     const self = this;
     let n = 0;
@@ -44,7 +35,7 @@ export class Queue<T> implements IQueue<T> {
         if (n >= self.items.length && self.done) return;
         if (n >= self.items.length) {
           // wait for more entries
-          await new Promise((r) => self.resolvers.push(r));
+          await new Promise((r: (value?: undefined) => void) => self.resolvers.push(r));
           continue;
         };
         const y = n++;

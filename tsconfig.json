@@ -6,6 +6,7 @@
     "verbatimModuleSyntax": true,
     "declaration": true,
     "sourceMap": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "outDir": "./dist"
   }
 }

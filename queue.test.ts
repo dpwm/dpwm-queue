@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { Queue } from './queue';
+import { Queue } from './queue.js';
 
 const sum = (a, b) => a + b;
 

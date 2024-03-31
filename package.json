@@ -8,7 +8,7 @@
     "test": "vitest run"
   },
   "keywords": [],
-  "author": "",
+  "author": "David Mallows",
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^20.12.2",

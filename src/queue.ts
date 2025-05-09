@@ -14,14 +14,15 @@
 
 export class Queue<T> {
   done: boolean = false;
+  _autoclose: boolean = false;
   items: T[];
-  private resolvers:((value?: undefined) => void)[] = [];
+  private resolvers: ((value?: undefined) => void)[] = [];
 
   constructor(items: T[] = []) {
     this.items = items;
   }
 
-  private resolve():void {
+  private resolve(): void {
     this.resolvers.forEach(f => f());
     this.resolvers = [];
   }
@@ -39,16 +40,25 @@ export class Queue<T> {
     this.resolve();
   }
 
-  pForEach(f: (x: T, n: number) => Promise<void>, p:number=1, retries:number=10, onError:any=(x:T,n:number,errors:Error[]) => {console.log(x, n, errors)}) {
+  autoClose(): void {
+    this._autoclose = true;
+  }
+
+  pForEach(f: (x: T, n: number) => Promise<void>, p: number = 1, retries: number = 10, onError: any = (x: T, n: number, errors: Error[]) => { console.log(x, n, errors) }) {
     // Parallel forEach that minimises wasted time and automatically retries on failure
     const self = this;
     let n = 0;
 
     async function worker() {
       while (true) {
-        if (n >= self.items.length && self.done) return;
         if (n >= self.items.length) {
+          if (self.done) return;
           // wait for more entries
+          if (self._autoclose && self.resolvers.length == p - 1) {
+            self.close();
+            return;
+          }
+
           await new Promise((r: (value?: undefined) => void) => self.resolvers.push(r));
           continue;
         };
@@ -56,7 +66,7 @@ export class Queue<T> {
         let i;
         let errors = [];
 
-        for (i=0; i<retries; i++) {
+        for (i = 0; i < retries; i++) {
           try {
             await f(self.items[y], y);
             break;

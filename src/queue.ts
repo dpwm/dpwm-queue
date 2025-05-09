@@ -27,11 +27,11 @@ export class Queue<T> {
     this.resolvers = [];
   }
 
-  push(x: T): void {
+  push(...x: T[]): void {
     if (this.done) {
       throw new Error("Queue closed");
     }
-    this.items.push(x);
+    this.items.push(...x);
     this.resolve();
   }
 
